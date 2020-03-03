@@ -1,0 +1,53 @@
+---
+
+# Forwards https 8000 to http 8000
+- name: Create Elastic Application Load Balancer
+  local_action:
+    module: elb_application_lb
+    name: "{{ project_name }}-{{env_type}}-application"
+    state: present
+    region: ap-southeast-2
+    idle_timeout: 75 #
+    listeners:       
+      - Protocol: HTTPS
+        Port: 8000
+        SslPolicy: ELBSecurityPolicy-2016-08        
+        Certificates:
+          - CertificateArn: "{{elb_ssl_cert_arn}}"
+        DefaultActions:
+          - Type: forward
+            TargetGroupName: "{{ project_name }}-{{env_type}}-http"
+    security_groups:
+      - "{{ project_name }}-{{env_type}}-loadbalancer"
+    subnets: 
+      - subnet-5585da13 # ap-southeast-2c
+      - subnet-895e6afd # ap-southeast-2a
+      - subnet-98efe4fa # ap-southeast-2b
+  register: ec2_elb_lb
+  tags:
+    - ec2
+    - elb
+    - lb
+
+# This handles icecast streaming
+- name: Create Elastic Network Load Balancer
+  local_action:
+    module: elb_network_lb
+    name: "{{ project_name }}-{{env_type}}-network"
+    state: present
+    region: ap-southeast-2
+    listeners:       
+      - Protocol: TCP
+        Port: 8000
+        DefaultActions:
+          - Type: forward
+            TargetGroupName: "{{ project_name }}-{{env_type}}-tcp"
+    subnets: 
+      - subnet-5585da13 # ap-southeast-2c
+      - subnet-895e6afd # ap-southeast-2a
+      - subnet-98efe4fa # ap-southeast-2b
+  register: ec2_elb_lb
+  tags:
+    - ec2
+    - elb
+    - lb

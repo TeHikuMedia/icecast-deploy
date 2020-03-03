@@ -1,0 +1,22 @@
+---
+
+- name: "Updating packages"
+  apt:
+    name: "*"
+    state: latest
+    update_cache: yes
+
+- name: Install icecast
+  apt:
+    name: 
+      - icecast2
+    state: present
+  notify:
+    - start icecast2
+
+- name: Install icecast configuration
+  template:
+    src: icecast.xml.j2
+    dest: /etc/icecast2/icecast.xml
+  notify:
+    - restart icecast2

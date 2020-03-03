@@ -1,0 +1,57 @@
+---
+
+- route53_zone:
+    zone: "{{domain_name}}"
+    state: present
+  register: zone
+  tags:
+    - route53
+
+# Create the route for the application load balancer
+- elb_application_lb_facts:
+    region: "{{aws_region}}"
+    names: "{{ project_name }}-{{env_type}}-application"
+  register: elb
+  tags:
+    - route53
+    - test
+
+- debug:
+    var: elb.load_balancers[0]
+- debug:
+    var: zone
+  
+- route53:
+    state: create
+    zone: "{{domain_name}}."
+    record: "{{application_subdomain}}.{{domain_name}}"
+    type: A
+    value: "{{elb.load_balancers[0]['dns_name']}}" # get this programaticlly
+    alias: yes
+    overwrite: yes
+    alias_hosted_zone_id: "{{elb.load_balancers[0]['canonical_hosted_zone_id']}}" # can we get this programattically
+  tags:
+    - route53
+  ignore_errors: yes
+
+# Create the route for the network load balancer
+- elb_application_lb_facts:
+    region: "{{aws_region}}"
+    names: "{{ project_name }}-{{env_type}}-network"
+  register: elb
+  tags:
+    - route53
+    - test
+
+- route53:
+    state: create
+    zone: "{{domain_name}}."
+    record: "{{network_subdomain}}.{{domain_name}}"
+    type: A
+    value: "{{elb.load_balancers[0]['dns_name']}}" # get this programaticlly
+    alias: yes
+    overwrite: yes
+    alias_hosted_zone_id: "{{elb.load_balancers[0]['canonical_hosted_zone_id']}}" # can we get this programattically
+  tags:
+    - route53
+  ignore_errors: yes

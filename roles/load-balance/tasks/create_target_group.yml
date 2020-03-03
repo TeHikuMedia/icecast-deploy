@@ -1,0 +1,48 @@
+---
+
+- ec2_instance_info:
+    region: "{{aws_region}}"
+    filters:
+      "tag:project_env":  "{{ project_name }}_{{env_type}}"
+  register:
+    ec2_instances
+
+- name: Create HTTP Load Balancing Target Group for icecast
+  local_action:
+    module: elb_target_group
+    name: "{{ project_name }}-{{env_type}}-http"
+    state: present
+    region: ap-southeast-2    
+    protocol: http
+    port: 8000
+    health_check_port: 8000
+    health_check_protocol: http
+    health_check_path: "/"
+    targets:
+      - Id: "{{ec2_instances.instances[0].instance_id}}"
+        Port: 8000
+    vpc_id: "{{ vpc_id }}" # THIS IS HARD CODED!
+  tags:
+    - ec2
+    - elb
+    - tg
+
+- name: Create TCP Load Balancing Target Group for icecast
+  local_action:
+    module: elb_target_group
+    name: "{{ project_name }}-{{env_type}}-tcp"
+    state: present
+    region: ap-southeast-2    
+    protocol: tcp
+    port: 8000
+    health_check_port: 8000
+    health_check_protocol: http
+    health_check_path: "/"
+    targets:
+      - Id: "{{ec2_instances.instances[0].instance_id}}"
+        Port: 8000
+    vpc_id: "{{ vpc_id }}" # THIS IS HARD CODED!
+  tags:
+    - ec2
+    - elb
+    - tg

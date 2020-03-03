@@ -1,0 +1,7 @@
+.vagrant*
+.DS_store
+*.retry
+*.pyc
+
+vault.yml
+DISABLED

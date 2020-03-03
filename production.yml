@@ -1,0 +1,65 @@
+### PLAYBOOK FOR THE PRODUCTION SERVERS ###
+
+- name: "Launch production {{ project_name }} server"
+  hosts: localhost
+  vars_files:
+    - env_vars/base.yml
+    - env_vars/production.yml
+    - env_vars/vault.yml
+  vars:
+    - server_type: web
+  roles:
+    - ec2
+    - ensure-ec2-running
+    - load-balance   
+  tags:
+    - production
+    - launch
+    - launch-production
+    - remote
+
+
+- name: "Provision production {{ project_name }} server"
+  hosts: tag_project_env_{{ project_name }}_{{env_type}}
+  remote_user: ubuntu
+  become: true
+  vars:
+    - setup_bitbucket_repo: yes
+    - update_apt_cache: yes
+    - rebuild_database: no
+    - server_type: web
+    - host_tag: tag_project_env_{{project_name}}_{{env_type}}
+  vars_files:
+    - env_vars/base.yml
+    - env_vars/production.yml
+    - env_vars/vault.yml
+  roles:
+    - icecast
+  tags:
+    - production
+    - provision
+    - provision-production
+    - web
+    - remote
+
+# - name: "Deploy {{ project_name }} customisation"
+#   hosts: tag_project_env_server_type_{{ project_name }}_{{env_type}}_web
+#   serial: "100%"
+#   remote_user: ubuntu
+#   become: true
+#   vars:
+#     - update_apt_cache: yes
+#     - server_type: web
+#     - host_tag: tag_project_env_server_type_{{project_name}}_{{env_type}}_web
+#   vars_files:
+#     - env_vars/base.yml
+#     - env_vars/production.yml
+#     - env_vars/vault.yml
+#   roles:
+#     - sunshine
+#   tags:
+#     - production
+#     - deploy
+#     - deploy-production
+#     - web
+#     - remote
