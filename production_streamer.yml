@@ -1,10 +1,15 @@
 ### PLAYBOOK FOR THE PRODUCTION SERVERS ###
+#
+# This is for icecast-prod.iwi.radio
+#
+#
+#
 
 - name: "Launch production {{ project_name }} server"
   hosts: localhost
   vars_files:
     - env_vars/base.yml
-    - env_vars/production.yml
+    - env_vars/production2.yml
     - env_vars/vault.yml
   vars:
     - server_type: web
@@ -19,8 +24,8 @@
     - remote
 
 - name: "Provision production {{ project_name }} server"
-  hosts: tag_project_env_{{ project_name }}_{{ env_type }}
-  remote_user: ubuntu
+  hosts: tag_project_env_{{ project_name_tag }}_{{ env_type }}
+  remote_user: admin
   become: true
   vars:
     - setup_bitbucket_repo: true
@@ -30,7 +35,7 @@
     - host_tag: tag_project_env_{{ project_name }}_{{ env_type }}
   vars_files:
     - env_vars/base.yml
-    - env_vars/production.yml
+    - env_vars/production2.yml
     - env_vars/vault.yml
   roles:
     - icecast

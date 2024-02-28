@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "SSH FS - stream.iwi.radio",
+			"uri": "ssh://stream.iwi.radio/etc/icecast2"
+		}
+	],
+	"settings": {}
+}

@@ -1,0 +1,23 @@
+---
+ec2_key_pair: libretime
+project_name: prod-icecast
+project_name_tag: prod_icecast
+ssl_dest_dir: /etc/ssl
+aws_region: ap-southeast-2
+timezone: Pacific/Auckland
+
+# Application subdomain is for users e.g. https
+# Network subdomain is for icecast 8000 port
+domain_name: iwi.radio
+application_subdomain: prod-stream
+network_subdomain: prod-icecast
+host_name: stream.iwi.radio
+
+env_type: production
+
+# AWS Settings
+webserver_instance_type: t4g.nano #m5.large
+webserver_ami: ami-0c80e45d45c979b73 # sydney, Debian 12 arm
+vpc_id: vpc-9a9d97f8
+
+certificate_domain_name: "{{ domain_name }}"

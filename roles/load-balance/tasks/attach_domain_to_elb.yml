@@ -1,57 +1,55 @@
 ---
 
-- route53_zone:
-    zone: "{{domain_name}}"
+- name: Create route
+  amazon.aws.route53_zone:
+    zone: "{{ domain_name }}"
     state: present
   register: zone
   tags:
     - route53
 
-# Create the route for the application load balancer
-- elb_application_lb_facts:
-    region: "{{aws_region}}"
-    names: "{{ project_name }}-{{env_type}}-application"
+- name: Get application elb
+  amazon.aws.elb_application_lb_info:
+    region: "{{ aws_region }}"
+    names: "{{ project_name }}-{{ env_type }}-https"
   register: elb
   tags:
     - route53
     - test
 
-- debug:
-    var: elb.load_balancers[0]
-- debug:
-    var: zone
-  
-- route53:
+- name: Create the route
+  delegate_to: localhost
+  amazon.aws.route53:
     state: create
-    zone: "{{domain_name}}."
-    record: "{{application_subdomain}}.{{domain_name}}"
+    zone: "{{ domain_name }}."
+    record: "{{ application_subdomain }}.{{ domain_name }}"
     type: A
-    value: "{{elb.load_balancers[0]['dns_name']}}" # get this programaticlly
-    alias: yes
-    overwrite: yes
-    alias_hosted_zone_id: "{{elb.load_balancers[0]['canonical_hosted_zone_id']}}" # can we get this programattically
+    value: "{{ elb.load_balancers[0]['dns_name'] }}" # get this programaticlly
+    alias: true
+    overwrite: true
+    alias_hosted_zone_id: "{{ elb.load_balancers[0]['canonical_hosted_zone_id'] }}" # can we get this programattically
   tags:
     - route53
-  ignore_errors: yes
 
-# Create the route for the network load balancer
-- elb_application_lb_facts:
-    region: "{{aws_region}}"
-    names: "{{ project_name }}-{{env_type}}-network"
+- name: Get the network load balancer info
+  amazon.aws.elb_application_lb_info:
+    region: "{{ aws_region }}"
+    names: "{{ project_name }}-{{ env_type }}-tcp"
   register: elb
   tags:
     - route53
     - test
 
-- route53:
+- name: Route
+  delegate_to: localhost
+  amazon.aws.route53:
     state: create
-    zone: "{{domain_name}}."
-    record: "{{network_subdomain}}.{{domain_name}}"
+    zone: "{{ domain_name }}."
+    record: "{{ network_subdomain }}.{{ domain_name }}"
     type: A
-    value: "{{elb.load_balancers[0]['dns_name']}}" # get this programaticlly
-    alias: yes
-    overwrite: yes
-    alias_hosted_zone_id: "{{elb.load_balancers[0]['canonical_hosted_zone_id']}}" # can we get this programattically
+    value: "{{ elb.load_balancers[0]['dns_name'] }}" # get this programaticlly
+    alias: true
+    overwrite: true
+    alias_hosted_zone_id: "{{ elb.load_balancers[0]['canonical_hosted_zone_id'] }}" # can we get this programattically
   tags:
     - route53
-  ignore_errors: yes

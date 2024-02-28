@@ -1,3 +1,2 @@
 ---
-
-- include: launch_webserver_instance.yml
+- ansible.builtin.include_tasks: launch_webserver_instance.yml

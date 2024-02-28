@@ -1,25 +1,39 @@
 ---
 
+- name: Get facts for ACM certificate
+  community.aws.acm_certificate_info:
+    domain_name: "{{ certificate_domain_name }}"
+    region: "{{ aws_region }}"
+  register: acm_facts
+  tags:
+    - cloudfront
+    - route53
+
+- debug: var=acm_facts['certificates']
+  tags:
+    - cloudfront
+    - route53
+
 # Forwards https 8000 to http 8000
 - name: Create Elastic Application Load Balancer
-  local_action:
-    module: elb_application_lb
-    name: "{{ project_name }}-{{env_type}}-application"
+  delegate_to: localhost
+  amazon.aws.elb_application_lb:
+    name: "{{ project_name }}-{{ env_type }}-https"
     state: present
-    region: ap-southeast-2
+    region: "{{ aws_region }}"
     idle_timeout: 75 #
-    listeners:       
+    listeners:
       - Protocol: HTTPS
         Port: 8000
-        SslPolicy: ELBSecurityPolicy-2016-08        
+        SslPolicy: ELBSecurityPolicy-2016-08
         Certificates:
-          - CertificateArn: "{{elb_ssl_cert_arn}}"
+          - CertificateArn: "{{ acm_facts.certificates.0.certificate_arn }}"
         DefaultActions:
           - Type: forward
-            TargetGroupName: "{{ project_name }}-{{env_type}}-http"
+            TargetGroupName: "{{ project_name }}-{{ env_type }}-http"
     security_groups:
-      - "{{ project_name }}-{{env_type}}-loadbalancer"
-    subnets: 
+      - "{{ project_name }}-{{ env_type }}-loadbalancer"
+    subnets:
       - subnet-5585da13 # ap-southeast-2c
       - subnet-895e6afd # ap-southeast-2a
       - subnet-98efe4fa # ap-southeast-2b
@@ -31,18 +45,18 @@
 
 # This handles icecast streaming
 - name: Create Elastic Network Load Balancer
-  local_action:
-    module: elb_network_lb
-    name: "{{ project_name }}-{{env_type}}-network"
+  delegate_to: localhost
+  community.aws.elb_network_lb:
+    name: "{{ project_name }}-{{ env_type }}-tcp"
     state: present
-    region: ap-southeast-2
-    listeners:       
+    region: "{{ aws_region }}"
+    listeners:
       - Protocol: TCP
         Port: 8000
         DefaultActions:
           - Type: forward
-            TargetGroupName: "{{ project_name }}-{{env_type}}-tcp"
-    subnets: 
+            TargetGroupName: "{{ project_name }}-{{ env_type }}-tcp"
+    subnets:
       - subnet-5585da13 # ap-southeast-2c
       - subnet-895e6afd # ap-southeast-2a
       - subnet-98efe4fa # ap-southeast-2b

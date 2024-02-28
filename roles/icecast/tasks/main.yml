@@ -1,14 +1,13 @@
 ---
-
 - name: "Updating packages"
   apt:
     name: "*"
     state: latest
-    update_cache: yes
+    update_cache: true
 
 - name: Install icecast
   apt:
-    name: 
+    name:
       - icecast2
     state: present
   notify:

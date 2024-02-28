@@ -1,16 +1,5 @@
 ---
-
-- include: create_target_group.yml
-- include: create_load_balancer_sercurity_group.yml
-- include: create_load_balancer.yml
-- include: attach_domain_to_elb.yml
-
-# WIP
-
-# - include: create_ec2_scaling_launch_configuration.yml
-
-# - include: create_ec2_scaling_group.yml
-
-# - include: create_ec2_asg_policy.yml
-
-# - include: create_ec2_asg_alarm.yml
+- ansible.builtin.include_tasks: create_target_group.yml
+- ansible.builtin.include_tasks: create_load_balancer_security_group.yml
+- ansible.builtin.include_tasks: create_load_balancer.yml
+- ansible.builtin.include_tasks: attach_domain_to_elb.yml

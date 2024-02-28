@@ -1,8 +1,8 @@
 ---
-ec2_key_pair : libretime
+ec2_key_pair: libretime
 project_name: icecast
 ssl_dest_dir: /etc/ssl
-aws_region: ap-southeast-2
+aws_region: "{{ aws_region }}"
 timezone: Pacific/Auckland
 
 domain_name: tehiku.radio
