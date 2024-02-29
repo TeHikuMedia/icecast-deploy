@@ -5,19 +5,21 @@
   amazon.aws.ec2_instance_info:
     region: "{{ aws_region }}"
     filters:
-      tag:project_env: "{{ project_name }}_{{ env_type }}"
+      tag:project_env_server_type: "{{ project_name_tag }}_{{ env_type }}"
   register: ec2_facts
-
 
 - name: Set ec2_server ec2_facts
   ansible.builtin.set_fact:
     ec2_server: "{{ ec2_facts.instances.0 }}"
 
+- debug:
+    var: ec2_server
 
 - name: Ensure ec2 is running
   delegate_to: localhost
   amazon.aws.ec2_instance:
-    instance_ids: "{{ ec2_server.instance_id }}"
+    instance_ids:
+      - "{{ ec2_server.instance_id }}"
     region: "{{ aws_region }}"
     state: running
     wait: true
@@ -32,16 +34,17 @@
     state: started
   when: ec2_server.state.name != 'running'
 
-- name: Get ec2 instance info
+- name: Get instance info
+  delegate_to: localhost
   amazon.aws.ec2_instance_info:
     region: "{{ aws_region }}"
     filters:
-      tag:project_env: "{{ project_name }}_{{ env_type }}"
+      tag:project_env_server_type: "{{ project_name_tag }}_{{ env_type }}"
   register: ec2_facts
 
-- name: Set ec2_server var
+- name: Set ec2_server ec2_facts
   ansible.builtin.set_fact:
-    ec2_server: "{{ ec2_facts.instances[0] }}"
+    ec2_server: "{{ ec2_facts.instances.0 }}"
 
 - name: Write the new ec2 instance host key to known hosts
   connection: local

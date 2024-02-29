@@ -3,7 +3,7 @@
   amazon.aws.ec2_instance_info:
     region: "{{ aws_region }}"
     filters:
-      "tag:project_env": "{{ project_name }}_{{ env_type }}"
+      tag:project_env_server_type: "{{ project_name_tag }}_{{ env_type }}"
   register: ec2_instances
 
 - name: Create HTTP Load Balancing Target Group for icecast

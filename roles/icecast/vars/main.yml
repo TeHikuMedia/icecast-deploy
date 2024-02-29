@@ -1,6 +1,5 @@
 ---
-
 connection_limit: 1000
-source_limit: 10
+source_limit: 30
 
 location: Muriwhenua
