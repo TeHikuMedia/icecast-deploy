@@ -12,7 +12,7 @@
     - env_vars/production2.yml
     - env_vars/vault.yml
   vars:
-    - server_type: web
+    server_type: web
   roles:
     - ec2
     - ensure-ec2-running
@@ -28,11 +28,11 @@
   remote_user: admin
   become: true
   vars:
-    - setup_bitbucket_repo: true
-    - update_apt_cache: true
-    - rebuild_database: false
-    - server_type: web
-    - host_tag: tag_project_env_{{ project_name }}_{{ env_type }}
+    setup_bitbucket_repo: true
+    update_apt_cache: true
+    rebuild_database: false
+    server_type: web
+    host_tag: tag_project_env_{{ project_name }}_{{ env_type }}
   vars_files:
     - env_vars/base.yml
     - env_vars/production2.yml
